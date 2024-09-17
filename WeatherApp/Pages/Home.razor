@@ -1,0 +1,85 @@
+﻿@page "/"
+@inject IWeatherClient Weather
+
+<PageTitle>Home</PageTitle>
+
+@if (Forecast != null)
+{
+    <div class="min-h-screen bg-gradient-to-b from-blue-400 to-blue-600 p-4">
+        <div class="mx-auto max-w-md space-y-4">
+            <h1 class="text-center text-3xl font-bold">Weather App</h1>
+
+            <div class="flex space-x-2">
+                <input type="text" placeholder="Enter city" class="input bg-white/20 flex-grow placeholder-white" />
+                <button class="btn btn-secondary btn-square">
+                    <i class="fa fa-lg fa-search"></i>
+                </button>
+            </div>
+
+            <div class="card card-compact bg-white/10 border-white/20">
+                <div class="card-body gap-4">
+                    <h1 class="card-title text-2xl">New York</h1>
+                    <div class="flex items-center justify-between">
+                        <div class="flex-grow">
+                            <div class="mb-4 text-5xl font-bold">@Forecast.Current.Temperature @Forecast.CurrentUnits.Temperature</div>
+                            <p class="mb-4 text-xl">@GetDescription()</p>
+                        </div>
+                        <dotlottie-wc class="aspect-square h-28" src="lottiefiles/@GetLottieAnimation()" autoplay="true"></dotlottie-wc>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-droplet"></i>
+                            <span>@Forecast.Current.RelativeHumidity @Forecast.CurrentUnits.RelativeHumidity</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-wind"></i>
+                            <span>@Forecast.Current.WindSpeed @Forecast.CurrentUnits.WindSpeed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <em>Loading...</em>
+}
+
+@code
+{
+    private Forecast? Forecast { get; set; }
+
+    private string Animation => Forecast.Current.WeatherCode switch
+    {
+        61 => "animation-thunder-rain-day.json",
+        _ => "animation-clear-day.json"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        using var response = await Weather.GetForecastAsync(43.471199, 11.863060, ["temperature_2m", "relative_humidity_2m", "is_day", "wind_speed_10m", "weather_code"]);
+        await response.EnsureSuccessStatusCodeAsync();
+
+        Forecast = response.Content;
+    }
+
+    private string GetLottieAnimation()
+    {
+        if (Forecast == null) return "";
+
+        return Forecast.Current switch
+        {
+            { WeatherCode: 61 } => "animation-thunder-rain.json",
+            _ => "animation-clear"
+        };
+    }
+
+    private string GetDescription() => Forecast?.Current.WeatherCode switch
+    {
+        61 => "Rain",
+        _ => "N/A"
+    };
+}
