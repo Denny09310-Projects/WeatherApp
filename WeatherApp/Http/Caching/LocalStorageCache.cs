@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using System.Text.Json;
-using System.Text;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 
 namespace WeatherApp.Http.Caching;
 
@@ -41,8 +41,16 @@ public class LocalStorageCache(ILocalStorageService storage, IOptions<MemoryCach
 
     public void Dispose()
     {
-        _cache.Dispose();
+        Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _cache.Dispose();
+        }
     }
 
     void IMemoryCache.Remove(object key)

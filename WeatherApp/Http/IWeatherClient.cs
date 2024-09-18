@@ -1,4 +1,5 @@
 ﻿using Refit;
+using WeatherApp.Http.Attributes;
 using WeatherApp.Models;
 
 namespace WeatherApp.Http;
@@ -7,5 +8,6 @@ namespace WeatherApp.Http;
 public interface IWeatherClient
 {
     [Get("/forecast")]
+    [ResponseCaching(3600)]
     Task<ApiResponse<Forecast>> GetForecastAsync(double latitude, double longitude, string[] current);
 }

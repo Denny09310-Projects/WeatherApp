@@ -21,4 +21,11 @@
     <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Include="WeatherApp" />
+    <Using Include="WeatherApp.Http" />
+    <Using Include="WeatherApp.Http.Caching" />
+    <Using Include="WeatherApp.Http.Handlers" />
+  </ItemGroup>
+
 </Project>
