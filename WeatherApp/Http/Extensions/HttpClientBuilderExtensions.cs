@@ -2,6 +2,7 @@ using System.Net;
 using Polly;
 using Polly.Caching;
 using Polly.Extensions.Http;
+using WeatherApp.Http;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -46,32 +47,5 @@ internal static class HttpClientBuilderExtensions
 
         // Combine the caching, retry, and circuit breaker policies into a single policy pipeline
         return Policy.WrapAsync(cachePolicy, retryPolicy, circuitBreakerPolicy);
-    }
-}
-
-internal class DefaultPolicyHandlerOptions
-{
-    public TimeSpan CacheExpirationTime { get; set; } = TimeSpan.FromMinutes(5);
-
-    public int MaxAttempts { get; set; } = 3;
-
-    public int MaxHandledEventsBeforeBreaking { get; set; } = 3;
-}
-
-internal class HttpRequestCachingHandler : DelegatingHandler
-{
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        if (request.Method == HttpMethod.Get)
-        {
-            // Create a unique operation key based on the request URI
-            var operationKey = request.RequestUri!.AbsoluteUri;
-
-            // Set the policy execution context using the operation key
-            var context = new Context(operationKey);
-            request.SetPolicyExecutionContext(context);
-        }
-
-        return base.SendAsync(request, cancellationToken);
     }
 }

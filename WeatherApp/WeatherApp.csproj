@@ -22,7 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Extensions\" />
+    <Folder Include="Http\Extensions\" />
+    <Folder Include="Http\Handlers\" />
+    <Folder Include="Http\Options\" />
   </ItemGroup>
 
 </Project>
