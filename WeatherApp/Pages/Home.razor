@@ -50,7 +50,7 @@ else
 {
     private Forecast? Forecast { get; set; }
 
-    private string Animation => Forecast.Current.WeatherCode switch
+    private string Animation => Forecast?.Current.WeatherCode switch
     {
         61 => "animation-thunder-rain-day.json",
         _ => "animation-clear-day.json"
