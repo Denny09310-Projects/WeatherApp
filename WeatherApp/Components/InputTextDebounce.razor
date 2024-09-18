@@ -1,0 +1,54 @@
+﻿@using System.Reactive.Subjects
+@using System.Reactive.Linq
+@implements IDisposable
+
+<input @bind-value:get="@Value" @bind-value:set="ValueChangedInner" @bind-value:event="oninput" @attributes="@AdditionalAttributes" />
+
+@code 
+{
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter]
+    public double Debounce { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; } = [];
+
+    private string? inner;
+
+    private Subject<string?> subject = new();
+    private IDisposable? subscription;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            subscription?.Dispose();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        subscription = subject
+            .Throttle(TimeSpan.FromMilliseconds(Debounce))
+            .Subscribe(value => ValueChanged.InvokeAsync(value));
+    }
+
+    private void ValueChangedInner(string? value)
+    {
+        Value = value;
+        subject.OnNext(value);
+    }
+}

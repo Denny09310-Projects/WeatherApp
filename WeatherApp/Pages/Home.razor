@@ -1,5 +1,6 @@
 ﻿@page "/"
-@inject IWeatherClient Weather
+@inject IWeatherApi Weather
+@inject IGeocodingApi Geocoding
 
 <PageTitle>Home</PageTitle>
 
@@ -10,7 +11,7 @@
             <h1 class="text-center text-3xl font-bold">Weather App</h1>
 
             <div class="flex space-x-2">
-                <input type="text" placeholder="Enter city" class="input bg-white/20 flex-grow placeholder-white" />
+                <InputTextDebounce Debounce="500" ValueChanged="SearchLocation" type="text" placeholder="Enter city" class="input bg-white/20 flex-grow placeholder-white" />
                 <button class="btn btn-secondary btn-square">
                     <i class="fa fa-lg fa-search"></i>
                 </button>
@@ -64,6 +65,12 @@ else
         await response.EnsureSuccessStatusCodeAsync();
 
         Forecast = response.Content;
+    }
+
+    private async Task SearchLocation(string value)
+    {
+        var response = await Geocoding.SearchLocation(value);
+        Console.WriteLine(response.Results[0].Name);
     }
 
     private string GetLottieAnimation()

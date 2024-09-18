@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Refit;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -12,9 +11,7 @@ builder.Services.AddScoped<ResponseCachingHandler>();
 builder.Services.AddLocalStorageServices();
 builder.Services.AddSingleton<ILocalStorageCache, LocalStorageCache>();
 
-builder.Services.AddRefitClient<IWeatherClient>()
-    .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.open-meteo.com/v1"))
-    .AddHttpMessageHandler<ResponseCachingHandler>()
-    .AddStandardResilienceHandler();
+builder.Services.AddApiClient<IWeatherApi>("https://api.open-meteo.com/v1");
+builder.Services.AddApiClient<IGeocodingApi>("https://geocoding-api.open-meteo.com/v1");
 
 await builder.Build().RunAsync();

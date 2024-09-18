@@ -5,7 +5,7 @@ using WeatherApp.Models;
 namespace WeatherApp.Http;
 
 [Headers("Content-Type: application/json")]
-public interface IWeatherClient
+public interface IWeatherApi
 {
     [Get("/forecast")]
     [ResponseCaching(3600)]
