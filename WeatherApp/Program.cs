@@ -8,10 +8,12 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddHttpCache();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ResponseCachingHandler>();
 
 builder.Services.AddRefitClient<IWeatherClient>()
     .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.open-meteo.com/v1"))
-    .AddDefaultPolicyHandler(config => config.CacheExpirationTime = TimeSpan.FromHours(1));
+    .AddHttpMessageHandler<ResponseCachingHandler>()
+    .AddStandardResilienceHandler();
 
 await builder.Build().RunAsync();
