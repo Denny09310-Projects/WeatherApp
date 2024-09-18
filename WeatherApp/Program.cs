@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Refit;
 using WeatherApp;
 using WeatherApp.Http;
+using WeatherApp.Http.Caching;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -10,6 +11,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ResponseCachingHandler>();
+
+builder.Services.AddLocalStorageServices();
+builder.Services.AddSingleton<ILocalStorageCache, LocalStorageCache>();
 
 builder.Services.AddRefitClient<IWeatherClient>()
     .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.open-meteo.com/v1"))

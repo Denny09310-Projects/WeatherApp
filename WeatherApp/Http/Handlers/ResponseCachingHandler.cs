@@ -1,24 +1,30 @@
+using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 using System.Text;
-using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using WeatherApp.Http.Caching;
 
 namespace WeatherApp.Http;
 
-internal class ResponseCachingHandler(IMemoryCache cache) : DelegatingHandler
+internal class ResponseCachingHandler(ILocalStorageCache cache) : DelegatingHandler
 {
     private static readonly MemoryCacheEntryOptions _options = new()
     {
         SlidingExpiration = TimeSpan.FromMinutes(5),
     };
 
-    private readonly IMemoryCache _cache = cache;
+    private readonly ILocalStorageCache _cache = cache;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         string key = request.RequestUri!.AbsoluteUri;
 
-        if (request.Method != HttpMethod.Post && _cache.TryGetValue(key, out var value) && value is CachedResponse cached)
+        if (request.Method != HttpMethod.Post && _cache.TryGetValue(key, out var value) && value is JsonElement json)
         {
+            var cached = json.Deserialize<CachedResponse>();
+            ArgumentNullException.ThrowIfNull(cached);
+
             return new HttpResponseMessage(cached.StatusCode)
             {
                 Content = new StringContent(cached.Content, Encoding.UTF8, "application/json")
@@ -34,4 +40,6 @@ internal class ResponseCachingHandler(IMemoryCache cache) : DelegatingHandler
     }
 }
 
-public record CachedResponse(string Content, HttpStatusCode StatusCode);
+public record CachedResponse(
+    [property: JsonPropertyName("content")] string Content,
+    [property: JsonPropertyName("statusCode")][property: JsonConverter(typeof(JsonStringEnumConverter))] HttpStatusCode StatusCode);
